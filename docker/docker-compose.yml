@@ -50,6 +50,9 @@ services:
         condition: service_healthy
     env_file:
       - ../.env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgrespassword@postgres:5432/rewind_db
+      - REDIS_URL=redis://redis:6379/0
     volumes:
       - media_data:/app/data/media
 
@@ -68,6 +71,9 @@ services:
         condition: service_healthy
     env_file:
       - ../.env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgrespassword@postgres:5432/rewind_db
+      - REDIS_URL=redis://redis:6379/0
     volumes:
       - media_data:/app/data/media
 
@@ -84,6 +90,9 @@ services:
         condition: service_healthy
     env_file:
       - ../.env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgrespassword@postgres:5432/rewind_db
+      - REDIS_URL=redis://redis:6379/0
 
 volumes:
   postgres_data:
