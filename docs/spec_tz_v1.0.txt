@@ -1,0 +1,2138 @@
+TELEGRAM CHAT AUTOMATION BOT
+TO‘LIQ TEXNIK TOPSHIRIQ (TZ) v1.0
+
+Sana: 09.09.2026
+Platforma: Telegram
+Integratsiya: Telegram Bot API + Telegram Business / Connected Business Bot
+Monetizatsiya: Telegram Stars
+Tarif: 3 kun bepul → 50 ⭐ / 30 kun
+Asosiy vazifa: foydalanuvchining Telegram shaxsiy chatlarida o‘chirilgan, tahrirlangan va media xabarlar tarixini saqlash hamda foydalanuvchiga bot orqali ko‘rsatish.
+
+Telegram’ning hozirgi Bot API’da business_connection, business_message, edited_business_message va deleted_business_messages update’lari mavjud. BusinessMessagesDeleted obyektida business_connection_id, chat va o‘chirilgan message_id lar keladi.
+
+==================================================
+1. LOYIHA MAQSADI
+==================================================
+
+Mahsulot Telegram akkauntiga Chat Automation / Business Bot sifatida ulanadi va foydalanuvchi ruxsat bergan shaxsiy chatlarda xabarlar oqimini kuzatadi.
+
+Asosiy funksiyalar:
+
+1. O‘chirilgan matnli xabarni ko‘rsatish.
+2. O‘chirilgan rasm/video/voice/faylni saqlab qolish.
+3. Tahrirlangan xabarning eski va yangi variantlarini ko‘rsatish.
+4. Bitta xabarning barcha tahrir versiyalarini saqlash.
+5. Bir martalik View Once mediani aniqlash va imkon bo‘lsa foydalanuvchiga chiqarish.
+6. View-once xabarga reply berilganda mediani foydalanuvchining bot chatiga yuborish.
+7. O‘chirilgan xabarlar tarixini ko‘rish.
+8. Kontakt/chat bo‘yicha qidirish.
+9. 3 kunlik bepul trial.
+10. 50 Telegram Stars evaziga 30 kunlik avtomatik obuna.
+11. Obunani avtomatik uzaytirish.
+12. Obunani bekor qilish.
+13. Foydalanuvchining ma’lumotlarini o‘chirish.
+14. Administrator statistikasi.
+
+==================================================
+2. MUHIM TELEGRAM CHEKLOVLARI
+==================================================
+
+2.1. Faqat Business Bot ruxsat berilgan chatlar
+
+Telegram foydalanuvchiga:
+- mavjud chatlar;
+- yangi chatlar;
+- kontaktlar;
+- kontakt bo‘lmaganlar;
+- individual tanlangan chatlar;
+- chiqarib tashlangan chatlar
+bo‘yicha Business Bot access’ini boshqarish imkonini beradi.
+
+2.2. Faqat private non-secret chatlar
+
+Business Bot boshqaruvi Telegram’ning oddiy private, non-secret chatlari uchun ishlaydi. Secret Chat alohida E2E tizim bo‘lib, ushbu mahsulot doirasiga kiritilmaydi.
+
+2.3. Bir akkauntga bitta Business Bot
+
+Hozir Telegram bir foydalanuvchi akkauntiga bir vaqtning o‘zida faqat bitta connected business bot ulashga ruxsat beradi.
+
+Demak foydalanuvchida Not Spy Bot kabi boshqa Chat Automation bot mavjud bo‘lsa, biznikini ulash uchun o‘shani almashtirishi kerak bo‘ladi.
+
+2.4. Eski o‘chirilgan xabarlarni tiklamaymiz
+
+Bot faqat bot ulanganidan va xabarni qabul qilganidan keyingi kontentni saqlaydi.
+
+Bot ulanmasidan avval o‘chirilgan xabarni qayta tiklash imkoniyati yo‘q.
+
+==================================================
+3. MAHSULOT NOMI
+==================================================
+
+Ishchi nom:
+Rewind Bot
+
+Kod ichida:
+PROJECT_NAME=rewind
+
+Keyinchalik nom va username almashtirilishi mumkin.
+
+Misol:
+@RewindChatBot
+
+==================================================
+4. FOYDALANUVCHI ROLLARI
+==================================================
+
+USER
+
+Oddiy foydalanuvchi:
+- botni ishga tushiradi;
+- Business Connection ulaydi;
+- trial ishlatadi;
+- obuna sotib oladi;
+- o‘chirilgan/tahrirlangan xabarlarni oladi;
+- tarixni ko‘radi;
+- sozlamalarni o‘zgartiradi;
+- ma’lumotlarini o‘chiradi.
+
+ADMIN
+
+Administrator:
+- foydalanuvchilar soni;
+- triallar;
+- pullik obunalar;
+- Stars tushumi;
+- storage;
+- xatolar;
+- faol connectionlar;
+- paymentlar
+haqidagi ma’lumotlarni ko‘radi.
+
+==================================================
+5. FOYDALANUVCHINI RO‘YXATDAN O‘TKAZISH
+==================================================
+
+FR-001 — /start
+
+Foydalanuvchi:
+/start
+
+yuboradi.
+
+Bot:
+👋 Rewind’ga xush kelibsiz.
+
+Telegram chatlaringizdagi o‘chirilgan va tahrirlangan xabarlarni saqlab qoling.
+
+🎁 3 kun bepul
+⭐ Keyin 50 Stars / 30 kun
+
+[⚡ Boshlash]
+
+chiqaradi.
+
+==================================================
+6. TRIAL QACHON BOSHLANADI
+==================================================
+
+Muhim qaror:
+
+Trial /start bosilganda emas, Business Connection muvaffaqiyatli ulanganda boshlanadi.
+
+Bu foydalanuvchining trial vaqtini setup jarayonida sarflab yubormaydi.
+
+DB:
+trial_started_at
+trial_expires_at
+trial_used
+
+Business connection birinchi marta faol bo‘lganda:
+trial_started_at = NOW
+trial_expires_at = NOW + 72 hours
+trial_used = true
+
+Foydalanuvchi botni uzib, qayta ulasa:
+trial_used = true
+
+bo‘lgani sababli yana 3 kun berilmaydi.
+
+==================================================
+7. BUSINESS CONNECTION
+==================================================
+
+Bot quyidagi update’ni qabul qilishi shart:
+business_connection
+
+Saqlanadigan ma’lumot:
+business_connection_id
+telegram_user_id
+user_chat_id
+connection_date
+is_enabled
+rights
+created_at
+updated_at
+
+BusinessConnection.user_chat_id 32-bit chegaradan katta bo‘lishi mumkin, shuning uchun DB’da BIGINT ishlatiladi.
+
+==================================================
+8. CONNECTION HOLATLARI
+==================================================
+
+NOT_CONNECTED
+      ↓
+CONNECTED
+      ↓
+TRIAL_ACTIVE
+      ↓
+PAID_ACTIVE
+      ↓
+EXPIRED
+
+Qo‘shimcha:
+DISCONNECTED
+PAUSED
+PAYMENT_FAILED
+CANCELED
+
+==================================================
+9. TELEGRAM UPDATE HANDLERLARI
+==================================================
+
+Backend quyidagilarni qabul qiladi:
+
+- business_connection — Connection yaratish/o‘zgartirish
+- business_message — Yangi xabar
+- edited_business_message — Tahrir
+- deleted_business_messages — O‘chirish
+- message — Bot bilan oddiy chat/payment
+- callback_query — Tugmalar
+- pre_checkout_query — Stars checkout
+- subscription — Subscription status
+
+==================================================
+10. ASOSIY MESSAGE KEY
+==================================================
+
+Har bir Business Message quyidagilar kombinatsiyasi bilan aniqlanadi:
+
+business_connection_id
+chat_id
+message_id
+
+Faqat:
+chat_id + message_id
+
+yetarli emas.
+
+Unique constraint:
+
+UNIQUE(
+    business_connection_id,
+    chat_id,
+    message_id
+)
+
+==================================================
+11. YANGI XABARNI QABUL QILISH
+==================================================
+
+FR-100
+
+business_message kelganda:
+
+Telegram
+   ↓
+Webhook
+   ↓
+Update deduplication
+   ↓
+Subscription check
+   ↓
+Chat upsert
+   ↓
+Message save
+   ↓
+Media check
+   ↓
+Media queue
+
+Saqlanadi:
+
+message_id
+chat_id
+business_connection_id
+
+sender_id
+sender_username
+sender_first_name
+sender_last_name
+
+direction
+date
+
+text
+caption
+entities
+
+message_type
+
+reply_to_message_id
+media_group_id
+
+created_at
+
+==================================================
+12. MESSAGE TURLARI
+==================================================
+
+Qo‘llab-quvvatlanadi:
+
+TEXT
+PHOTO
+VIDEO
+VOICE
+VIDEO_NOTE
+DOCUMENT
+AUDIO
+ANIMATION
+STICKER
+CONTACT
+LOCATION
+VENUE
+POLL
+CHECKLIST
+OTHER
+
+==================================================
+13. TAHRIRLANGAN XABAR
+==================================================
+
+FR-200
+
+Update:
+edited_business_message
+
+kelganda bot mavjud xabarni overwrite qilmasligi kerak.
+
+Noto‘g‘ri:
+messages.text = new_text
+
+To‘g‘ri:
+message_versions jadvaliga yangi versiya qo‘shiladi.
+
+Misol:
+
+Version 1
+Bugun soat 18:00
+
+Version 2
+Bugun soat 19:00
+
+Version 3
+Ertaga soat 19:00
+
+==================================================
+14. MESSAGE VERSIONING
+==================================================
+
+Jadval:
+
+message_versions
+----------------
+id
+message_id_fk
+version_number
+
+text
+caption
+entities_json
+
+telegram_edit_date
+created_at
+
+Unique:
+UNIQUE(message_id_fk, version_number)
+
+Content hash:
+SHA256(normalized_content)
+
+Bir xil update qayta kelganda yangi version yaratilmaydi.
+
+==================================================
+15. TAHRIR NOTIFICATION
+==================================================
+
+Misol:
+
+✏️ Xabar tahrirlandi
+
+👤 Aziz
+🕐 19:41
+
+Oldingi:
+Bugun 18:00 da boraman
+
+Yangi:
+Ertaga 18:00 da boraman
+
+[📜 Barcha versiyalar]
+
+Agar media caption tahrirlangan bo‘lsa, xuddi shu mexanizm ishlaydi.
+
+==================================================
+16. O‘CHIRILGAN XABAR
+==================================================
+
+FR-300
+
+Telegram:
+deleted_business_messages
+
+yuboradi.
+
+Uning ichida:
+business_connection_id
+chat
+message_ids[]
+
+mavjud.
+
+Telegram o‘chirilgan xabarning matnini shu update bilan qayta yubormaydi; shuning uchun kontentni xabar kelgan paytda DB’ga saqlash majburiy.
+
+==================================================
+17. DELETE ALGORITMI
+==================================================
+
+Har bir message_id uchun:
+
+SELECT message
+WHERE
+ business_connection_id = ?
+ AND chat_id = ?
+ AND telegram_message_id = ?
+
+Topilsa:
+
+is_deleted = true
+deleted_at = NOW()
+
+deleted_events yaratiladi.
+
+So‘ng notification.
+
+==================================================
+18. DELETE NOTIFICATION
+==================================================
+
+Matnli xabar:
+
+🗑 Xabar o‘chirildi
+
+👤 Aziz
+🕐 21:14
+
+Bugun uchrashmaymiz.
+
+Agar oldin tahrirlangan bo‘lsa:
+
+🗑 Tahrirlangan xabar o‘chirildi
+
+Oxirgi variant:
+Ertaga boraman
+
+[📜 3 ta oldingi versiya]
+
+==================================================
+19. DB’DA XABAR TOPILMASA
+==================================================
+
+Masalan server xabarni ololmagan bo‘lsa:
+
+🗑 Xabar o‘chirilgani aniqlandi.
+
+⚠️ Xabarning mazmuni arxivda mavjud emas.
+
+Hech qachon soxta kontent yaratilmaydi.
+
+==================================================
+20. MEDIA ARXIVLASH
+==================================================
+
+FR-400
+
+Incoming media kelishi bilan:
+
+1. metadata olinadi;
+2. file_id saqlanadi;
+3. file_unique_id saqlanadi;
+4. file size aniqlanadi;
+5. download queue yaratiladi;
+6. fayl object storage’ga ko‘chiriladi.
+
+==================================================
+21. NIMA UCHUN MEDIA DARHOL YUKLANADI
+==================================================
+
+Faqat Telegram file_id ga ishonib qolmaymiz.
+
+Media recovery uchun mustaqil nusxa:
+
+Telegram
+   ↓
+Download Worker
+   ↓
+Object Storage
+
+ga saqlanadi.
+
+==================================================
+22. MEDIA STORAGE
+==================================================
+
+Production:
+S3-compatible object storage
+
+Masalan:
+
+bucket/
+ └── users/
+     └── {user_id}/
+         └── {year}/
+             └── {month}/
+                 └── {uuid}
+
+DB’da:
+
+media_objects
+-------------
+id
+message_id_fk
+
+telegram_file_id
+file_unique_id
+
+media_type
+mime_type
+file_name
+file_size
+
+storage_key
+sha256
+
+download_status
+created_at
+expires_at
+
+==================================================
+23. DEFAULT BOT API FILE LIMITI
+==================================================
+
+MVP:
+
+<= 20 MB → physical backup
+> 20 MB → file_id metadata
+
+Production:
+
+Self-hosted telegram-bot-api server.
+
+Production uchun Local Bot API Server tavsiya qilinadi.
+
+==================================================
+24. MEDIA DELETE
+==================================================
+
+Aziz rasm yuboradi:
+
+PHOTO message #1844
+
+Bot darhol:
+S3 → media/abc123.jpg
+
+saqlaydi.
+
+Aziz rasmni o‘chiradi:
+
+deleted_business_messages:
+message_ids=[1844]
+
+Bot:
+
+🗑 Rasm o‘chirildi
+
+👤 Aziz
+
+[RASM]
+
+ko‘rinishida foydalanuvchiga yuboradi.
+
+Xuddi shu:
+video
+voice
+video_note
+document
+animation
+audio
+
+uchun ishlashi kerak.
+
+==================================================
+25. VIEW-ONCE MEDIA
+==================================================
+
+Bu yerda TZ’ning eng muhim texnik farqi bor.
+
+Telegram’ning MTProto rasmiy API darajasida self-destruct/view-once media:
+ttl_seconds
+
+orqali aniqlanadi.
+
+View-once qiymati:
+0x7FFFFFFF
+
+deb belgilangan.
+
+Ammo HTTP Bot API Message obyektida ttl_seconds field ochiq ko‘rsatilmagan bo‘lishi mumkin.
+
+Shuning uchun:
+
+VIEW-ONCE MODULE = EXPERIMENTAL / PoC REQUIRED
+
+==================================================
+26. VIEW-ONCE UCHUN PoC
+==================================================
+
+Developmentning birinchi bosqichida alohida test qilinadi:
+
+Test A:
+Telegram Business Chat orqali view-once photo yuboriladi.
+Raw update log tekshiriladi.
+
+Test B:
+Bot API orqali media object keladimi?
+
+Test C:
+file_id mavjudmi?
+
+Test D:
+getFile orqali download mumkinmi?
+
+Test E:
+Raw MTProto business update orqali messageMediaPhoto.ttl_seconds olinadimi?
+
+Test F:
+Download qilganda media sender/user uchun “opened” bo‘lib belgilanadimi?
+
+Test G:
+Owner reply qilganda original message reference mavjudmi?
+
+Faqat shu PoC muvaffaqiyatli bo‘lsa feature PRODUCTION holatiga o‘tadi.
+
+==================================================
+27. HYBRID API ARXITEKTURA
+==================================================
+
+Agar view-once uchun zarur bo‘lsa:
+
+                ┌── Bot API HTTP
+Telegram ───────┤
+                └── MTProto Bot Session
+
+ishlatilishi mumkin.
+
+Bu userbot emas.
+
+Foydalanuvchidan:
+telefon raqami
+OTP
+2FA password
+api_hash
+
+olish taqiqlanadi.
+
+Faqat bot akkaunti ishlatiladi.
+
+==================================================
+28. VIEW-ONCE REPLY TRIGGER
+==================================================
+
+PoC muvaffaqiyatli bo‘lsa:
+
+Foydalanuvchiga:
+[view once photo]
+
+keladi.
+
+Foydalanuvchi o‘sha xabarga:
+.
+yoki:
++
+ok
+👍
+istalgan matn
+
+deb reply qiladi.
+
+Backend outgoing business_message ni oladi.
+
+Tekshiradi:
+reply_to_message_id
+↓
+view_once_cache
+↓
+topilsa media foydalanuvchining Rewind Bot chatiga oddiy media sifatida yuboriladi.
+
+Reply matni ahamiyatsiz.
+
+==================================================
+29. MESSAGE ARCHIVE
+==================================================
+
+Bot menyusi:
+
+🏠 Bosh menyu
+
+🗑 O‘chirilganlar
+✏️ Tahrirlanganlar
+📷 Media
+🔎 Qidirish
+💎 Obuna
+⚙️ Sozlamalar
+
+==================================================
+30. O‘CHIRILGANLAR TARIXI
+==================================================
+
+🗑 O‘chirilganlar bosilganda:
+
+So‘nggi o‘chirilganlar
+
+1. Aziz — "Ertaga..."
+2. Bekzod — 📷 Photo
+3. Sardor — 🎙 Voice
+4. Ali — "Narxi..."
+
+Pagination:
+⬅️ 1 / 12 ➡️
+
+==================================================
+31. QIDIRUV
+==================================================
+
+Filterlar:
+
+👤 Kontakt
+📅 Sana
+🗑 Deleted
+✏️ Edited
+📷 Media type
+🔤 Text search
+
+PostgreSQL MVP:
+ILIKE
+
+Keyin:
+PostgreSQL FTS
+
+==================================================
+32. TRIAL
+==================================================
+
+Tarif:
+72 soat
+
+To‘liq PRO funksiyalar beriladi.
+
+Trial tugashidan:
+24 soat
+6 soat
+
+oldin reminder.
+
+Misol:
+
+⏳ PRO sinov muddati ertaga tugaydi.
+
+Keyingi tarif:
+⭐ 50 Stars / 30 kun
+
+==================================================
+33. TRIAL TUGASHI
+==================================================
+
+72 soat tugaganda:
+
+TRIAL_ACTIVE
+↓
+TRIAL_EXPIRED
+
+Monitoring:
+content persistence = OFF
+
+Bot:
+
+⏳ Bepul sinov muddati tugadi.
+
+Monitoringni davom ettirish:
+
+50 ⭐ / 30 kun
+
+[⭐ PRO’ni faollashtirish]
+
+==================================================
+34. NIMA UCHUN PAYMENTNI 3 KUN O‘TGANDAN KEYIN OLAMIZ
+==================================================
+
+Telegram recurring subscription to‘lov qilingan zahoti boshlanadi.
+
+Shuning uchun:
+
+Day 0 → trial
+Day 3 → payment
+Day 33 → renewal
+
+qilamiz.
+
+Bu:
+“3 kun bepul + keyin 30 kun pullik”
+modelini aniq saqlaydi.
+
+==================================================
+35. TELEGRAM STARS SUBSCRIPTION
+==================================================
+
+Parametrlar:
+
+currency = "XTR"
+amount = 50
+subscription_period = 2592000
+
+2592000:
+30 × 24 × 60 × 60
+
+==================================================
+36. INVOICE
+==================================================
+
+Backend:
+createInvoiceLink
+
+orqali recurring subscription link yaratadi.
+
+Payload:
+rewind_pro:{telegram_user_id}:{uuid}
+
+Telegram Stars uchun:
+
+provider_token = ""
+currency = XTR
+prices = [
+    {
+       label: "Rewind PRO — 30 kun",
+       amount: 50
+    }
+]
+subscription_period = 2592000
+
+==================================================
+37. PRE-CHECKOUT
+==================================================
+
+Update:
+pre_checkout_query
+
+Backend:
+
+1. payload tekshiradi;
+2. user mavjudligini tekshiradi;
+3. invoice price = 50 tekshiradi;
+4. currency = XTR;
+5. duplicate/replay emasligini tekshiradi;
+6. answerPreCheckoutQuery(ok=true) yuboradi.
+
+==================================================
+38. SUCCESSFUL PAYMENT
+==================================================
+
+successful_payment ichidan:
+
+currency
+total_amount
+invoice_payload
+subscription_expiration_date
+is_recurring
+is_first_recurring
+telegram_payment_charge_id
+
+maydonlaridan foydalaniladi.
+
+DB:
+
+subscriptions
+-------------
+id
+user_id
+
+status
+
+started_at
+expires_at
+
+auto_renew
+
+telegram_charge_id
+invoice_payload
+
+created_at
+updated_at
+
+==================================================
+39. PAYMENT JADVALI
+==================================================
+
+payments
+--------
+id
+user_id
+subscription_id
+
+telegram_payment_charge_id UNIQUE
+
+currency
+amount
+
+is_recurring
+is_first_recurring
+
+payment_date
+subscription_expiration_date
+
+raw_payload
+
+telegram_payment_charge_id UNIQUE bo‘lishi shart.
+
+Bu webhook replay natijasida ikki marta subscription berilishining oldini oladi.
+
+==================================================
+40. SUBSCRIPTION STATE MACHINE
+==================================================
+
+TRIAL
+   ↓
+TRIAL_EXPIRED
+   ↓
+ACTIVE
+   ↓
+CANCELED_PENDING_EXPIRY
+   ↓
+EXPIRED
+
+Qo‘shimcha:
+PAYMENT_FAILED
+REFUNDED
+
+==================================================
+41. AUTO-RENEWAL
+==================================================
+
+Telegram 30 kun tugagach avtomatik ravishda yana:
+50 ⭐
+
+yechishga urinadi.
+
+Successful renewal kelganda:
+
+expires_at =
+successful_payment.subscription_expiration_date
+
+qilinadi.
+
+Lokal serverda shunchaki:
+expires_at += 30 days
+
+qilish tavsiya etilmaydi.
+
+Telegram yuborgan expiration date — source of truth.
+
+==================================================
+42. SUBSCRIPTION CANCEL
+==================================================
+
+Menyu:
+
+💎 PRO
+
+Holat: Faol
+Narx: 50 ⭐
+Amal qiladi: 09.10.2026 gacha
+Auto-renew: ✅
+
+[❌ Avtomatik uzaytirishni o‘chirish]
+
+Backend tegishli Telegram subscription boshqaruv metodidan foydalanadi.
+
+Joriy davr oxirigacha xizmat ishlaydi.
+
+==================================================
+43. PAYMENT FAILED
+==================================================
+
+Subscription payment muvaffaqiyatsiz bo‘lsa:
+
+PAYMENT_FAILED
+
+deb belgilanadi.
+
+Expiration date o‘tgach:
+
+ACTIVE → EXPIRED
+
+==================================================
+44. REFUND
+==================================================
+
+Admin uchun:
+
+/refund {telegram_payment_charge_id}
+
+Backend Telegram Stars refund metodidan foydalanadi.
+
+==================================================
+45. SUBSCRIPTION ACCESS CHECK
+==================================================
+
+Har bir Business update uchun:
+
+has_access(user)
+
+tekshiruvi mavjud bo‘lishi shart.
+
+Formula:
+
+trial_expires_at > NOW
+OR
+subscription.expires_at > NOW
+
+==================================================
+46. EXPIRED USER
+==================================================
+
+Expired user uchun xabar kontenti permanent saqlanmaydi.
+
+Backend:
+
+business_message
+↓
+subscription check = false
+↓
+discard content
+
+Bu storage xarajatini va privacy riskini kamaytiradi.
+
+Bot bir marta:
+
+🔒 Monitoring to‘xtatilgan.
+
+PRO obunangizni yangilang.
+
+[⭐ 50 Stars]
+
+yuboradi.
+
+Har bir xabar uchun spam qilmaydi.
+
+==================================================
+47. NOTIFICATION SETTINGS
+==================================================
+
+Foydalanuvchi alohida boshqarishi mumkin:
+
+🗑 Deleted text        ✅
+✏️ Edited messages     ✅
+📷 Deleted photos      ✅
+🎥 Deleted videos      ✅
+🎙 Deleted voice       ✅
+👁 View Once           ✅
+🔔 Notifications       ✅
+
+==================================================
+48. CHAT EXCLUSION
+==================================================
+
+Botning o‘z DB’sida ham blacklist bo‘lishi kerak:
+
+excluded_chats
+
+Telegramning o‘z Business Bot recipient sozlamalariga qo‘shimcha himoya.
+
+Masalan:
+
+Family      ❌
+Rahbar      ❌
+Aziz        ✅
+
+==================================================
+49. MA’LUMOTLAR BAZASI
+==================================================
+
+Asosiy jadvallar:
+
+users
+business_connections
+chats
+messages
+message_versions
+media_objects
+deleted_events
+subscriptions
+payments
+user_settings
+excluded_chats
+notification_jobs
+processed_updates
+audit_logs
+
+==================================================
+50. USERS
+==================================================
+
+users
+-----
+id UUID PK
+
+telegram_user_id BIGINT UNIQUE
+username VARCHAR
+first_name VARCHAR
+last_name VARCHAR
+
+language VARCHAR(5)
+
+trial_used BOOLEAN
+trial_started_at TIMESTAMPTZ
+trial_expires_at TIMESTAMPTZ
+
+status VARCHAR
+
+created_at TIMESTAMPTZ
+updated_at TIMESTAMPTZ
+
+==================================================
+51. CHATS
+==================================================
+
+chats
+-----
+id UUID PK
+
+user_id UUID FK
+
+business_connection_id VARCHAR
+telegram_chat_id BIGINT
+
+username VARCHAR
+first_name VARCHAR
+last_name VARCHAR
+
+is_excluded BOOLEAN
+
+created_at
+updated_at
+
+Unique:
+
+(user_id, business_connection_id, telegram_chat_id)
+
+==================================================
+52. MESSAGES
+==================================================
+
+messages
+--------
+id UUID PK
+
+user_id UUID FK
+chat_id UUID FK
+
+business_connection_id VARCHAR
+telegram_message_id BIGINT
+
+sender_id BIGINT
+
+direction VARCHAR
+type VARCHAR
+
+text TEXT
+caption TEXT
+
+reply_to_message_id BIGINT
+
+media_group_id VARCHAR
+
+sent_at TIMESTAMPTZ
+
+is_deleted BOOLEAN
+deleted_at TIMESTAMPTZ
+
+created_at
+updated_at
+
+==================================================
+53. RAW UPDATE SAQLASH
+==================================================
+
+Debug uchun barcha Telegram update’larni permanent saqlamaymiz.
+
+raw_updates:
+TTL = 7 days
+
+Sensitive payload encrypted.
+
+Production barqarorlashgach:
+TTL = 24-72 hours
+
+ga tushirish mumkin.
+
+==================================================
+54. UPDATE IDEMPOTENCY
+==================================================
+
+Telegram:
+update_id
+
+beradi.
+
+DB:
+
+processed_updates
+-----------------
+update_id BIGINT UNIQUE
+processed_at
+
+Agar bir update qayta yuborilsa:
+
+already exists → HTTP 200 → no processing
+
+==================================================
+55. WEBHOOK ARXITEKTURASI
+==================================================
+
+Production’da polling emas:
+WEBHOOK
+
+ishlatiladi.
+
+Endpoint:
+
+POST /telegram/webhook/{secret}
+
+Flow:
+
+Telegram
+    ↓
+HTTPS
+    ↓
+FastAPI webhook
+    ↓
+Validate
+    ↓
+Deduplicate
+    ↓
+Redis Queue
+    ↓
+HTTP 200
+    ↓
+Worker
+
+Webhook og‘ir processingni kutmaydi.
+
+==================================================
+56. NIMA UCHUN QUEUE KERAK
+==================================================
+
+Masalan 1 soniyada:
+100 ta media message
+
+kelsa webhook ularni download qilib turmasligi kerak.
+
+Webhook:
+receive → queue → 200
+
+Worker:
+DB
+media download
+notification
+
+qiladi.
+
+==================================================
+57. UPDATE YO‘QOLISHINING OLDINI OLISH
+==================================================
+
+Production talabi:
+
+Uptime ≥ 99.9%
+
+Monitoring majburiy.
+
+==================================================
+58. TEXNOLOGIK STACK
+==================================================
+
+Backend:
+
+Python 3.12+
+FastAPI
+aiogram 3.x
+SQLAlchemy 2.x
+asyncpg
+Pydantic
+
+Agar aiogram eng yangi Bot API field’larini hali qo‘llamasa:
+direct Telegram HTTP client
+
+adapter yoziladi.
+
+==================================================
+59. DATABASE
+==================================================
+
+PostgreSQL 16+
+
+Sabab:
+
+- transactional;
+- reliable;
+- JSONB;
+- indexing;
+- full text search;
+- partitioning;
+- concurrency.
+
+==================================================
+60. CACHE / QUEUE
+==================================================
+
+Redis 7+
+
+Vazifalar:
+
+rate limit
+temporary cache
+distributed lock
+worker queue
+notification dedupe
+
+==================================================
+61. STORAGE
+==================================================
+
+S3 compatible storage
+
+Fayl DB ichida BYTEA sifatida saqlanmasin.
+
+==================================================
+62. DEPLOYMENT
+==================================================
+
+Docker containerlar:
+
+rewind-api
+rewind-worker
+rewind-scheduler
+postgres
+redis
+telegram-bot-api
+reverse-proxy
+
+Storage tashqi S3 bo‘lishi mumkin.
+
+==================================================
+63. SERVER STRUKTURASI
+==================================================
+
+Internet
+   │
+   ▼
+Nginx/Caddy
+   │
+   ▼
+FastAPI
+   │
+   ├── PostgreSQL
+   ├── Redis
+   ├── Worker
+   └── S3
+
+Qo‘shimcha:
+Telegram Local Bot API Server
+
+==================================================
+64. BACKEND PROJECT STRUCTURE
+==================================================
+
+app/
+├── main.py
+├── config.py
+│
+├── telegram/
+│   ├── webhook.py
+│   ├── bot.py
+│   ├── business.py
+│   ├── payments.py
+│   ├── handlers/
+│   │   ├── start.py
+│   │   ├── connection.py
+│   │   ├── business_message.py
+│   │   ├── edited_message.py
+│   │   ├── deleted_message.py
+│   │   ├── subscription.py
+│   │   └── callbacks.py
+│
+├── services/
+│   ├── archive.py
+│   ├── media.py
+│   ├── notification.py
+│   ├── subscription.py
+│   ├── trial.py
+│   └── encryption.py
+│
+├── models/
+│
+├── repositories/
+│
+├── workers/
+│
+├── admin/
+│
+└── tests/
+
+==================================================
+65. SECURITY
+==================================================
+
+Majburiy talablar:
+
+HTTPS only
+
+Bot token source code’da bo‘lmaydi.
+
+BOT_TOKEN
+DATABASE_URL
+REDIS_URL
+S3_SECRET
+ENCRYPTION_KEY
+
+faqat Secret/Environment orqali.
+
+==================================================
+66. LEAST PRIVILEGE
+==================================================
+
+Core archive funksiyasi uchun:
+
+- profil nomini o‘zgartirish;
+- username o‘zgartirish;
+- gift boshqarish;
+- Stars transfer;
+- Story boshqarish;
+- boshqa xabarlarni delete qilish
+
+kabi huquqlar so‘ralmaydi.
+
+Biz faqat mahsulot uchun zarur access’dan foydalanamiz.
+
+==================================================
+67. ENCRYPTION
+==================================================
+
+Sensitive text va media:
+
+Transit:
+TLS
+
+Storage:
+AES-256 / server-side encryption
+
+Media:
+
+S3:
+private bucket
+public access = OFF
+
+Signed URL bo‘lsa:
+TTL <= 5 min
+
+==================================================
+68. DATA ISOLATION
+==================================================
+
+Har bir query:
+
+WHERE user_id = authenticated_user
+
+bo‘yicha ishlaydi.
+
+Bir foydalanuvchi boshqa foydalanuvchining:
+
+messages
+media
+chats
+payments
+
+ma’lumotlarini hech qanday ID manipulatsiyasi orqali ko‘ra olmasligi kerak.
+
+==================================================
+69. DATA DELETE
+==================================================
+
+Command:
+
+/delete_my_data
+
+Bot tasdiq so‘raydi:
+
+Barcha chat arxivingiz, media va tarix permanent o‘chiriladi.
+
+[❌ Bekor qilish] [🗑 O‘chirish]
+
+Tasdiqdan so‘ng:
+
+messages
+versions
+media
+chats
+settings
+
+o‘chiriladi.
+
+Payment ledger audit maqsadida minimal holatda alohida qolishi mumkin.
+
+==================================================
+70. MEDIA RETENTION
+==================================================
+
+PRO default:
+30 kun rolling archive
+
+Keyinchalik tarif:
+
+PRO      → 30 days
+PLUS     → 90 days
+ULTIMATE → 365 days
+
+MVP:
+30 kun
+
+yetarli.
+
+==================================================
+71. SCHEDULER
+==================================================
+
+Har soatda:
+
+expired trial
+expired subscription
+media TTL
+stale files
+failed jobs
+
+tekshiriladi.
+
+Har kuni:
+
+storage cleanup
+analytics rollup
+database cleanup
+
+==================================================
+72. RETRY
+==================================================
+
+Telegram API temporary error:
+
+1s
+5s
+30s
+2m
+10m
+
+exponential backoff.
+
+Maksimum:
+5 attempts
+
+Permanent error:
+
+403
+invalid chat
+blocked bot
+
+retry qilinmaydi.
+
+==================================================
+73. NOTIFICATION DUPLICATE PROTECTION
+==================================================
+
+Redis key:
+
+notify:
+{business_connection_id}:
+{chat_id}:
+{message_id}:
+{event_type}
+
+TTL:
+24h
+
+==================================================
+74. ADMIN
+==================================================
+
+Admin menu:
+
+👥 Users
+🔗 Connections
+💎 Subscribers
+🎁 Trials
+⭐ Revenue
+📦 Storage
+📨 Events
+⚠️ Errors
+
+==================================================
+75. ADMIN METRIKALAR
+==================================================
+
+Dashboard:
+
+Total users
+DAU
+MAU
+
+Connected accounts
+
+Trial active
+Trial expired
+
+Paid subscribers
+MRR in Stars
+
+Trial → paid conversion
+Churn
+
+Messages/day
+Deleted/day
+Edited/day
+
+Photos/day
+Videos/day
+
+Storage GB
+
+Payment failed
+Webhook error rate
+Worker queue depth
+
+==================================================
+76. LOGGING
+==================================================
+
+Structured JSON logging:
+
+timestamp
+level
+service
+update_id
+telegram_user_id
+business_connection_id
+event
+duration_ms
+error_code
+
+Xabar matnini oddiy logga yozish taqiqlanadi.
+
+Yomon:
+
+INFO received: "Mening karta raqamim..."
+
+To‘g‘ri:
+
+INFO message_received id=123 type=text size=34
+
+==================================================
+77. MONITORING
+==================================================
+
+Minimum:
+
+Sentry
+Prometheus
+Grafana
+
+yoki shu vazifani bajaradigan analoglar.
+
+Alertlar:
+
+API down
+Webhook errors > 2%
+Queue > threshold
+DB down
+Redis down
+S3 errors
+Disk > 80%
+Payment errors
+
+==================================================
+78. PERFORMANCE TALABLARI
+==================================================
+
+Text event:
+
+Telegram update → DB
+< 500 ms target
+
+Deleted notification:
+
+event → notification
+< 2 seconds target
+
+Media:
+
+download queue start
+< 2 seconds
+
+Oddiy bot command:
+
+response p95 < 1 second
+
+==================================================
+79. MASSHTABLASH
+==================================================
+
+Boshlanish:
+1 000 user
+
+Keyin:
+10 000
+50 000
+100 000+
+
+Backend stateless bo‘lishi kerak.
+
+Shunda:
+
+API x1
+→ API x3
+→ API x10
+
+horizontal scaling qilish mumkin.
+
+==================================================
+80. MEDIA DEDUPLICATION
+==================================================
+
+Media:
+SHA-256
+
+hisoblanadi.
+
+Bir xil media qayta kelganda physical storage’da dublikat yaratmaslik imkoniyati bo‘ladi.
+
+Lekin access mapping har user uchun alohida saqlanadi.
+
+==================================================
+81. RATE LIMIT
+==================================================
+
+Per user:
+
+commands:
+20 / minute
+
+Search:
+10 / minute
+
+Admin:
+alohida.
+
+Incoming Business Message esa rate-limit sababli tashlab yuborilmaydi.
+
+==================================================
+82. BOT UX
+==================================================
+
+Asosiy menyu:
+
+🛡 Rewind
+
+Monitoring: ✅ Ishlamoqda
+PRO: ✅ 08.10.2026 gacha
+
+🗑 O‘chirilganlar
+✏️ Tahrirlanganlar
+📷 Media
+🔎 Qidirish
+💎 Obuna
+⚙️ Sozlamalar
+
+==================================================
+83. /status
+==================================================
+
+Misol:
+
+🛡 Rewind Status
+
+Chat Automation: ✅
+Monitoring: ✅
+Tarif: PRO
+Amal qilish muddati: 08.10.2026
+Auto-renew: ✅
+
+Bugun:
+🗑 7 deleted
+✏️ 4 edited
+📷 2 media
+
+==================================================
+84. /help
+==================================================
+
+Faqat muhim narsalar:
+
+Bot qanday ishlaydi?
+Chat Automation qanday ulanadi?
+Deleted xabarlar
+Edited xabarlar
+Media
+Subscription
+Privacy
+Support
+
+==================================================
+85. SUPPORT
+==================================================
+
+Command:
+
+/support
+
+User ticket ochadi.
+
+Jadval:
+
+support_tickets
+
+Admin Telegram ichida javob beradi.
+
+==================================================
+86. TESTLAR
+==================================================
+
+TC-001
+User /start.
+Expected: user DB’da yaratiladi.
+
+TC-002
+Business Connection.
+Expected: 72h trial boshlanadi.
+
+TC-003
+User disconnect/reconnect.
+Expected: yangi trial berilmaydi.
+
+TC-004
+Incoming text:
+Salom
+Expected: DB’da saqlanadi.
+
+TC-005
+Text edit:
+Salom
+→
+Assalomu alaykum
+Expected: 2 version.
+
+TC-006
+Xabar delete.
+Expected: original kontent notification orqali keladi.
+
+TC-007
+3 marta edit + delete.
+Expected: barcha 3 versiya saqlanadi.
+
+TC-008
+Photo → delete.
+Expected: photo qayta yuboriladi.
+
+TC-009
+Voice → delete.
+Expected: voice qayta yuboriladi.
+
+TC-010
+Trial = 72h.
+Expected: monitoring lock.
+
+TC-011
+50 Stars payment.
+Expected: subscription active.
+
+TC-012
+Recurring renewal.
+Expected: expiration Telegram qiymati bilan yangilanadi.
+
+TC-013
+Cancel subscription.
+Expected: joriy davr oxirigacha ishlaydi.
+
+TC-014
+Duplicate webhook.
+Expected: duplicate record yo‘q.
+
+TC-015
+Server restart.
+Expected: subscription/archive yo‘qolmaydi.
+
+TC-016
+Media download failure.
+Expected: retry.
+
+TC-017
+Deleted event, DB’da original yo‘q.
+Expected: “Kontent mavjud emas”.
+
+TC-018
+View-once.
+Expected: PoC natijasi bilan tasdiqlanadi.
+
+==================================================
+87. MVP DEFINITION OF DONE
+==================================================
+
+MVP tayyor hisoblanishi uchun quyidagi 10 narsa 100% ishlashi shart:
+
+1. /start.
+2. Business Connection.
+3. 3 kunlik trial.
+4. business_message.
+5. edited_business_message.
+6. deleted_business_messages.
+7. Text archive.
+8. Photo/video/voice archive.
+9. 50 ⭐ recurring subscription.
+10. Production VPS + PostgreSQL + Redis + backup.
+
+View-once MVP’ni release qilishni bloklamaydi.
+
+Avval alohida PoC qilinadi.
+
+==================================================
+88. DEVELOPMENT BOSQICHLARI
+==================================================
+
+PHASE 0 — Telegram PoC
+
+Avval 3 ta eng katta texnik savolni yopamiz:
+
+1. Business delete
+2. Media delete recovery
+3. View-once
+
+PHASE 1 — Core
+
+BotFather
+Business Bot
+Webhook
+PostgreSQL
+business_message
+edited
+deleted
+
+PHASE 2 — Media
+
+photo
+video
+voice
+document
+storage
+
+PHASE 3 — UX
+
+menu
+history
+search
+settings
+
+PHASE 4 — Monetization
+
+trial
+50 Stars
+recurring subscription
+cancel
+payment states
+
+PHASE 5 — Production
+
+Docker
+VPS
+HTTPS
+Redis
+backup
+monitoring
+security
+
+PHASE 6 — View Once
+
+PoC muvaffaqiyatli bo‘lsa:
+
+MTProto layer
+view-once detection
+temporary cache
+reply trigger
+
+==================================================
+89. KEYINGI VERSIYA — V1.1
+==================================================
+
+MVP barqarorlashgach:
+
+🔎 Full-text search
+📊 Contact analytics
+⭐ Favorite messages
+📁 Export
+☁️ 90-day archive
+🌍 RU/EN language
+👥 Referral system
+🎁 Bonus Stars
+
+==================================================
+90. V2.0
+==================================================
+
+Keyinchalik mahsulotni oddiy “deleted messages bot”dan:
+
+Telegram Personal Chat Assistant
+
+ga aylantirish mumkin.
+
+Qo‘shimcha:
+
+🤖 Smart Reply
+📝 Chat Summary
+⏰ Reminder detection
+📌 Important message detection
+🔍 Semantic search
+👤 Contact memory
+
+Lekin AI MVP’ga kiritilmaydi.
+
+Bu loyihaning birinchi maqsadi:
+
+oddiy, tez, ishonchli va pul to‘lashga arziydigan archive bot yaratish.
+
+==================================================
+91. ENG MUHIM ARXITEKTURA
+==================================================
+
+Yakuniy sistemaning ko‘rinishi:
+
+             TELEGRAM
+                 │
+                 │ Business Connection
+                 ▼
+        ┌─────────────────┐
+        │ Telegram Bot API│
+        └────────┬────────┘
+                 │
+                 │ webhook
+                 ▼
+        ┌─────────────────┐
+        │    FastAPI      │
+        │ Webhook Gateway │
+        └────────┬────────┘
+                 │
+                 ▼
+             ┌───────┐
+             │ Redis │
+             └───┬───┘
+                 │
+        ┌────────┴────────┐
+        │                 │
+        ▼                 ▼
+ Message Worker       Media Worker
+        │                 │
+        ▼                 ▼
+ PostgreSQL              S3
+        │
+        ▼
+Notification Service
+        │
+        ▼
+Telegram Bot
+        │
+        ▼
+      USER
+
+Optional:
+
+Telegram
+    │
+    └── MTProto Bot Layer
+            │
+            └── View Once module
+
+==================================================
+92. BIRINCHI TEXNIK VAZIFA
+==================================================
+
+Kod yozishni avval PoC’dan boshlash tavsiya etiladi.
+
+Deleted/edit funksiyalari rasmiy API’da mavjud.
+
+Biz uchun asosiy noma’lum:
+View Once mediani Business Bot real sharoitida qanday olish.
+
+Shuning uchun loyiha developmentining 0-bosqichi:
+
+Telegram Test Bot
+      ↓
+Chat Automation
+      ↓
+Raw update logger
+      ↓
+Oddiy text
+      ↓
+Edit
+      ↓
+Delete
+      ↓
+Photo delete
+      ↓
+Voice delete
+      ↓
+View Once photo
+      ↓
+View Once video
+      ↓
+Reply to View Once
+
+Shu tajribalar natijasidan keyin production kodini yozish boshlanadi.
+
+==================================================
+YAKUNIY NATIJA
+==================================================
+
+Mazkur TZ bo‘yicha quriladigan bot:
+
+- Telegram Business / Chat Automation orqali ulanadi;
+- yangi shaxsiy xabarlarni qabul qiladi;
+- tahrir tarixini saqlaydi;
+- o‘chirilgan xabarlarni bazadan qayta ko‘rsatadi;
+- media fayllarni alohida storage’da saqlaydi;
+- view-once media uchun alohida PoC va maxsus modulga ega bo‘ladi;
+- 3 kunlik bepul trial taqdim etadi;
+- keyin 50 Telegram Stars / 30 kun tarifida ishlaydi;
+- recurring subscription qo‘llab-quvvatlaydi;
+- production, security va scaling talablariga tayyor arxitekturaga ega bo‘ladi.

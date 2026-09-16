@@ -1,0 +1,93 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rewind-bot"
+version = "1.0.0"
+description = "Telegram Business Chat Automation & Archive System"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    { name = "Rewind Team" }
+]
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.5.0",
+    "aiogram>=3.13.0",
+    "httpx>=0.27.0",
+    "aiofiles>=24.1.0",
+    "sqlalchemy>=2.0.35",
+    "asyncpg>=0.29.0",
+    "alembic>=1.13.3",
+    "psycopg2-binary>=2.9.9",
+    "redis>=5.0.8",
+    "hiredis>=3.0.0",
+    "aioboto3>=13.1.1",
+    "boto3>=1.35.0",
+    "apscheduler>=3.10.4",
+    "python-dotenv>=1.0.1",
+    "structlog>=24.4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.3",
+    "pytest-asyncio>=0.24.0",
+    "pytest-mock>=3.14.0",
+    "aiosqlite>=0.20.0",
+    "ruff>=0.6.0",
+    "black>=24.8.0",
+    "mypy>=1.11.0",
+]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra -q --strict-markers"
+testpaths = ["tests"]
+asyncio_mode = "auto"
+pythonpath = ["."]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::UserWarning",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+exclude = [
+    ".git",
+    "venv",
+    ".venv",
+    "alembic/versions",
+    "data",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "C",   # flake8-comprehensions
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "B008",  # do not perform function calls in argument defaults (FastAPI Depends)
+]
+
+[tool.black]
+line-length = 100
+target-version = ['py312']
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | venv
+  | alembic/versions
+)/
+'''

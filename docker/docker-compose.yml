@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: rewind_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: rewind_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Redis Cache & Worker Queue
+  redis:
+    image: redis:7-alpine
+    container_name: rewind_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 3. Rewind FastAPI Webhook API
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: rewind_api
+    restart: always
+    command: python run.py --mode api --host 0.0.0.0 --port 8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - ../.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - media_data:/app/data/media
+
+  # 4. Background Media Downloader Worker
+  worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: rewind_media_worker
+    restart: always
+    command: python run.py --mode worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - ../.env
+    volumes:
+      - media_data:/app/data/media
+
+  # 5. Background Scheduler (Trial reminders & TTL cleanups)
+  scheduler:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: rewind_scheduler
+    restart: always
+    command: python run.py --mode scheduler
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ../.env
+
+volumes:
+  postgres_data:
+  redis_data:
+  media_data:

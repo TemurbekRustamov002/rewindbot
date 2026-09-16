@@ -1,0 +1,35 @@
+# Core Framework & Async Server
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.9.0
+pydantic-settings>=2.5.0
+
+# Telegram Bot API
+aiogram>=3.13.0
+httpx>=0.27.0
+aiofiles>=24.1.0
+
+# Database & ORM
+sqlalchemy>=2.0.35
+asyncpg>=0.29.0
+alembic>=1.13.3
+psycopg2-binary>=2.9.9
+
+# Cache, Queue & Distributed Locks
+redis>=5.0.8
+hiredis>=3.0.0
+
+# Storage (S3 / Local)
+aioboto3>=13.1.1
+boto3>=1.35.0
+
+# Scheduling & Utilities
+apscheduler>=3.10.4
+python-dotenv>=1.0.1
+structlog>=24.4.0
+
+# Testing
+pytest>=8.3.3
+pytest-asyncio>=0.24.0
+pytest-mock>=3.14.0
+aiosqlite>=0.20.0
