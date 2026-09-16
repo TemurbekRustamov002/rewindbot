@@ -35,14 +35,14 @@ services:
       timeout: 5s
       retries: 5
 
-  # 3. Rewind FastAPI Webhook API
-  api:
+  # 3. Rewind Telegram Bot Service
+  bot:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    container_name: rewind_api
+    container_name: rewind_bot
     restart: always
-    command: python run.py --mode api --host 0.0.0.0 --port 8000
+    command: python run.py --mode polling
     depends_on:
       postgres:
         condition: service_healthy
@@ -50,8 +50,6 @@ services:
         condition: service_healthy
     env_file:
       - ../.env
-    ports:
-      - "8000:8000"
     volumes:
       - media_data:/app/data/media
 
